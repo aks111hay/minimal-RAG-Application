@@ -1,0 +1,18 @@
+# Dependency directories (never push these)
+node_modules/
+__pycache__/
+*.pyc
+
+# Environment variables and secrets (CRITICAL to ignore)
+.env
+.env.local
+.env.*.local
+
+# IDE and OS specific files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
