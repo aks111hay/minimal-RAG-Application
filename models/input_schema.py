@@ -6,3 +6,6 @@ class DocumentInput(BaseModel):
 
 class QueryInput(BaseModel):
     question : str
+
+class PDFInput(BaseModel):
+    filepath : str
