@@ -1,6 +1,6 @@
-from models.input_schema import DocumentInput,PDFInput
+from models.input_schema import DocumentInput,PDFInput,FAQItem
 from utils.generate_embedding_utils import get_embedding,split_text_into_chunks
-from config import collection
+from config import collection,faq_collection
 from typing import Dict
 import os
 from fastapi import HTTPException
@@ -38,8 +38,20 @@ def generate_embedding_by_pdf(inputPdf : PDFInput)-> Dict[str,str]:
                            metadatas=[{"source":inputPdf.filepath,"chunk_index":idx}])
         return {
             "status": "success", 
-            "message": f"Successfully processed '{os.path.basename(input_data.file_path)}' into {len(chunks)} chunks."
+            "message": f"Successfully processed '{os.path.basename(inputPdf.file_path)}' into {len(chunks)} chunks."
         }
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
+    
+
+def generate_faq_embedding(item: FAQItem)-> Dict[str,str]:
+    question_vector =get_embedding(item.question)
+    faq_collection.add(
+        ids=[item.id],
+        embeddings=[question_vector],
+        documents=[item.answer],
+        metadatas=[{"original_question":item.question}])
+    
+    return {"status":"success","message": f"FAQ '{item.id}' added successfully."}
+

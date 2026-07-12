@@ -9,3 +9,8 @@ class QueryInput(BaseModel):
 
 class PDFInput(BaseModel):
     filepath : str
+
+class FAQItem(BaseModel):
+    id:str
+    question:str
+    answer:str
