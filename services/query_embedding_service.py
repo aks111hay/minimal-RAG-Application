@@ -5,7 +5,9 @@ from config import collection,ai_client,faq_collection
 from fastapi import HTTPException
 from config import ai_client
 from google.genai import types
-from models.query_schema import QueryInputPayload
+from models.query_schema import QueryInputPayload,QueryBatch,SubQuery
+import json
+import logging
 
 def generate_answer(question:QueryInput) -> Dict[str,str]:
 
@@ -75,5 +77,39 @@ def generate_answer(question:QueryInput) -> Dict[str,str]:
 
 
 
-def decompose_user_query(orginal_query : str) -> QueryInputPayload:
-    decomposition_prompt = 
+def decompose_user_query(original_query : str) -> QueryInputPayload:
+    decomposition_prompt = f"""
+    You are an expert query analyzer. Your job is to break down a complex, multi-part user input 
+    into individual, standalone sub-queries, grouped by thematic categories.
+
+    Rules:
+    1. If the user asks about multiple distinct things, split them up.
+    2. Group similar topics together into the same sub-list. 
+    3. Make sure each sub-query string is entirely self-contained (e.g., replace pronouns with the actual subject).
+
+    User Input: "{original_query}"
+    """
+
+    try:
+        response = ai_client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=decomposition_prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=QueryBatch,
+                temperature=0.1
+            )
+        )
+        parsed_json = json.loads(response.text)
+
+        return QueryInputPayload(
+            original_query=original_query,
+            structured_batch=QueryBatch(**parsed_json)
+        )
+    
+    except Exception as e:
+        logging.info(f"Decomposition failed: {e}. Falling back to single query layout.")
+        return QueryInputPayload(
+            original_query=original_query,
+            structured_batch=QueryBatch(categories=[[SubQuery(text=original_query)]])
+        )
