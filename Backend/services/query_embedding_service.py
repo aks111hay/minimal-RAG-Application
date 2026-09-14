@@ -1,6 +1,6 @@
 from models.input_schema import QueryInput
 from typing import Dict
-from utils.generate_embedding_utils import get_embedding
+from Backend.utils.generate_embedding_utils import get_embedding
 from config import collection,ai_client
 from fastapi import HTTPException
 

@@ -1,5 +1,5 @@
 from models.input_schema import DocumentInput,PDFInput
-from utils.generate_embedding_utils import get_embedding,split_text_into_chunks
+from Backend.utils.generate_embedding_utils import get_embedding,split_text_into_chunks
 from config import collection
 from typing import Dict
 import os
